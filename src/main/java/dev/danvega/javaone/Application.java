@@ -22,7 +22,6 @@ public class Application {
         // Stdio Server Transport (Support for SSE also available)
         var transportProvider = new StdioServerTransportProvider(new ObjectMapper());
         // Sync tool specification
-        var syncToolSpecification = getSyncToolSpecification();
 
         // Create a server with custom configuration
         McpSyncServer syncServer = McpServer.sync(transportProvider)
@@ -32,25 +31,21 @@ public class Application {
                         .logging()
                         .build())
                 // Register tools, resources, and prompts
-                .tools(syncToolSpecification)
+                .tools(listPresentations(), searchPresentationsByTitle(), searchPresentationsByYear())
                 .build();
 
         log.info("Starting JavaOne MCP Server...");
     }
 
-    private static McpServerFeatures.SyncToolSpecification getSyncToolSpecification() {
+    private static McpServerFeatures.SyncToolSpecification listPresentations() {
         var schema = """
             {
-              "type" : "object",
-              "id" : "urn:jsonschema:Operation",
-              "properties" : {
-                "operation" : {
-                  "type" : "string"
-                }
-              }
+              "type": "object",
+              "properties": {}
             }
             """;
-        var syncToolSpecification = new McpServerFeatures.SyncToolSpecification(
+        // Tool implementation
+        return new McpServerFeatures.SyncToolSpecification(
                 new McpSchema.Tool("get_presentations", "Get a list of all presentations from JavaOne", schema),
                 (exchange, arguments) -> {
                     // Tool implementation
@@ -62,7 +57,60 @@ public class Application {
                     return new McpSchema.CallToolResult(contents, false);
                 }
         );
-        return syncToolSpecification;
+    }
+
+    private static McpServerFeatures.SyncToolSpecification searchPresentationsByTitle() {
+        var schema = """
+            {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                }
+              },
+              "required": ["query"]
+            }
+            """;
+        return new McpServerFeatures.SyncToolSpecification(
+                new McpSchema.Tool("search_presentations_by_title", "Search presentations by title", schema),
+                (exchange, arguments) -> {
+                    String query = arguments.get("query").toString();
+                    List<Presentation> presentations = presentationTools.searchPresentations(query);
+                    List<McpSchema.Content> contents = new ArrayList<>();
+                    for (Presentation presentation : presentations) {
+                        contents.add(new McpSchema.TextContent(presentation.toString()));
+                    }
+                    return new McpSchema.CallToolResult(contents, false);
+                }
+        );
+
+    }
+
+    private static McpServerFeatures.SyncToolSpecification searchPresentationsByYear() {
+        var schema = """
+            {
+              "type": "object",
+              "properties": {
+                "year": {
+                  "type": "integer"
+                }
+              },
+              "required": ["year"]
+            }
+            """;
+        return new McpServerFeatures.SyncToolSpecification(
+                new McpSchema.Tool("search_presentations_by_year", "Search presentations by title", schema),
+                (exchange, arguments) -> {
+                    Integer year = Integer.valueOf(arguments.get("year").toString());
+                    List<Presentation> presentations = presentationTools.getPresentationsByYear(year);
+                    List<McpSchema.Content> contents = new ArrayList<>();
+                    for (Presentation presentation : presentations) {
+                        contents.add(new McpSchema.TextContent(presentation.toString()));
+                    }
+                    return new McpSchema.CallToolResult(contents, false);
+                }
+        );
+
     }
 
 }

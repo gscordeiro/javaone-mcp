@@ -13,10 +13,10 @@ public class PresentationTools {
     public PresentationTools() {
         var keynoteOne = new Presentation("Java 24 Launch - Live from JavaOne 2025", "https://www.youtube.com/watch?v=mk_2MIWxLI0", 2025);
         var keynoteTwo = new Presentation("Java Turns 30 - Live from JavaOne 2025", "https://www.youtube.com/watch?v=GwR7Gvi80Xo", 2025);
-        var concerto = new Presentation("Concerto for Java & AI - Building Production-Ready LLM Applications","https://www.youtube.com/watch?v=MhILqEAscss", 2025);
-        var gatherers = new Presentation("Stream Gatherers - Deep Dive with the Expert","https://www.youtube.com/watch?v=v_5SKpfkI2U&t=6s", 2025);
-        var ai202 = new Presentation("AI 202: Next-Level AI Mastery for Java Developers","https://www.youtube.com/watch?v=DIyj_V8h8X0",2025);
-        var sequenced = new Presentation("Sequenced Collections - Deep Dive with the Expert","https://www.youtube.com/watch?v=6yuDqkkYTGU",2025);
+        var concerto = new Presentation("Concerto for Java & AI - Building Production-Ready LLM Applications","https://www.youtube.com/watch?v=MhILqEAscss", 2024);
+        var gatherers = new Presentation("Stream Gatherers - Deep Dive with the Expert","https://www.youtube.com/watch?v=v_5SKpfkI2U&t=6s", 2024);
+        var ai202 = new Presentation("AI 202: Next-Level AI Mastery for Java Developers","https://www.youtube.com/watch?v=DIyj_V8h8X0",2023);
+        var sequenced = new Presentation("Sequenced Collections - Deep Dive with the Expert","https://www.youtube.com/watch?v=6yuDqkkYTGU",2023);
 
         this.presentations.addAll(List.of(keynoteOne,keynoteTwo,concerto,gatherers,ai202,sequenced));
     }
@@ -41,4 +41,7 @@ public class PresentationTools {
                 .collect(Collectors.toList());
     }
 
+    public List<Presentation> searchPresentations(String query) {
+        return presentations.stream().filter(p -> p.title().toLowerCase().contains(query.toLowerCase())).toList();
+    }
 }
